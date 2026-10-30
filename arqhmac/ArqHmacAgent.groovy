@@ -342,7 +342,7 @@ class ArqHmacAgent extends UnetAgent {
   }
 
   // ================================================================ Diagnostics
-  // Compares the delay value in use with the true delay from the node's real position
+  // Compares the delay value in use with the true delay from the node's actual position
   void recordEstimate() {
     def p = get(agentForService(Services.NODE_INFO), NodeInfoParam.location)
     if (p == null) return
