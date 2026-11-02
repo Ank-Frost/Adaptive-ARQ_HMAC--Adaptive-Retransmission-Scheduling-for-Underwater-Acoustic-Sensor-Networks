@@ -137,7 +137,9 @@ def plot_condition(rows, condition):
     loads = sorted({r["load"] for r in rows if r["condition"] == condition})
     protocols = ordered({r["protocol"] for r in rows if r["condition"] == condition}, list(STYLE))
 
-    fig, axes = plt.subplots(1, len(PLOTTED), figsize=(19, 4.0))
+    # 2 x 3 grid: five metrics, the sixth cell holds the legend (readable at page width)
+    fig, grid = plt.subplots(2, 3, figsize=(11, 6.6))
+    axes = grid.flatten()
     for ax, (key, label, _) in zip(axes, PLOTTED):
         for proto in protocols:
             vals = [data[(proto, key, g)] for g in loads]
@@ -145,14 +147,15 @@ def plot_condition(rows, condition):
             errs = [stdev(v) if len(v) > 1 else 0 for v in vals]
             ax.errorbar(loads, means, yerr=errs, label=proto, linewidth=1.5, markersize=6,
                         capsize=3, elinewidth=1, **STYLE.get(proto, {}))
-        ax.set_title(label, fontsize=10, color=TEXT, loc="left")
+        ax.set_title(label, fontsize=11, color=TEXT, loc="left")
         ax.set_xlabel("Offered load G")
         ax.set_xticks(loads)
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="upper right", ncol=len(protocols), frameon=False, fontsize=9)
+    axes[-1].axis("off")
     n_seeds = len({r["seed"] for r in rows if r["condition"] == condition})
-    fig.suptitle(f"{condition}: mean ± std over {n_seeds} seeds", x=0.01, ha="left", fontsize=12)
-    fig.tight_layout(rect=(0, 0, 1, 0.92))
+    axes[-1].legend(handles, labels, loc="center", frameon=False, fontsize=11,
+                    title=f"{condition}\nmean ± std over {n_seeds} seeds", title_fontsize=11)
+    fig.tight_layout()
     path = os.path.join(RESULTS, f"fig_{condition}.png")
     fig.savefig(path, dpi=150)
     plt.close(fig)
